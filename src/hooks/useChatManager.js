@@ -80,7 +80,7 @@ export const useChatManager = () => {
       const finalMessages = [...newMessagesList, {
         role: 'ai',
         content: response.answer,
-        data: response.data,
+        chart_config: response.chart_config,
         sql_used: response.sql_used,
         cached_via: response.cached_via
       }];

@@ -5,7 +5,6 @@ import MessageBubble from './MessageBubble';
 const ChatArena = ({ messages, isLoading }) => {
   const bottomRef = useRef(null);
 
-  // Auto-scroll to bottom when messages change
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
@@ -43,7 +42,6 @@ const ChatArena = ({ messages, isLoading }) => {
           </div>
         )}
 
-        {/* Invisible div to act as a scroll anchor */}
         <div ref={bottomRef} />
       </div>
     </div>

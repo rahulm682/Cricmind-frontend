@@ -2,86 +2,139 @@ import React from 'react';
 import { useLocation } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { logout } from '../../features/authSlice';
-import { PlusCircle, Sparkles, MessageSquare, Database, Newspaper, User, Trash2, Activity, LogOut } from 'lucide-react';
+import {
+  PlusCircle, Sparkles, MessageSquare, Database,
+  Newspaper, User, Trash2, Activity, LogOut, Radio
+} from 'lucide-react';
+
+
+const NavItem = ({ icon: Icon, label, isActive, onClick, badge }) => (
+  <button
+    onClick={onClick}
+    className={`
+      relative flex items-center gap-2.5 w-full text-left px-3 py-2.5 rounded-lg
+      text-sm font-medium transition-all duration-150 group
+      ${isActive
+        ? 'bg-emerald-500/8 text-emerald-400 border border-emerald-500/20'
+        : 'text-slate-400 hover:bg-slate-800/60 hover:text-slate-200 border border-transparent'
+      }
+    `}
+  >
+    {isActive && (
+      <span className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 bg-emerald-500 rounded-r-full" />
+    )}
+
+    <Icon
+      size={15}
+      className={`shrink-0 transition-colors ${isActive ? 'text-emerald-400' : 'text-slate-500 group-hover:text-slate-300'}`}
+    />
+    <span className="flex-1 truncate">{label}</span>
+
+    {badge && badge}
+  </button>
+);
+
+
+const LiveBadge = () => (
+  <span className="flex items-center gap-1 text-[9px] font-bold text-red-400 bg-red-500/10 border border-red-500/20 rounded px-1.5 py-0.5 tracking-wider uppercase shrink-0">
+    <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
+    Live
+  </span>
+);
+
+
+const SectionLabel = ({ icon: Icon, label, iconClass = 'text-slate-600' }) => (
+  <div className="flex items-center gap-1.5 px-1 mb-2">
+    {Icon && <Icon size={12} className={iconClass} />}
+    <span className="text-[10px] font-bold text-slate-600 uppercase tracking-widest">
+      {label}
+    </span>
+  </div>
+);
+
 
 const Sidebar = ({ chats, activeChatId, onNewChat, onSelectChat, onPromptSelect, onNavigate, onDeleteChat }) => {
   const location = useLocation();
-  const isNewsTab = location.pathname === '/news';
+  const dispatch = useDispatch();
+
   const isChatTab = location.pathname === '/';
+  const isNewsTab = location.pathname === '/news';
   const isPlayerTab = location.pathname === '/players';
   const isLiveTab = location.pathname === '/live';
 
-  const dispatch = useDispatch();
-
-  const handleLogout = () => {
-    dispatch(logout());
-  };
+  const handleLogout = () => dispatch(logout());
 
   const suggestedPrompts = [
     "Give me a batting summary for Rohit Sharma",
     "Compare the economy rate of Jasprit Bumrah and Rashid Khan",
-    "Which team has won the most IPL trophies?"
+    "Which team has won the most IPL trophies?",
   ];
 
   return (
-    <div className="flex flex-col h-full p-4">
+    <div className="flex flex-col h-full py-4 px-3">
 
-      <div className="flex flex-col space-y-2 pb-6 border-b border-slate-800 mb-6">
-        <button
+      <div className="space-y-1 pb-4 border-b border-slate-800/80 mb-4">
+        <SectionLabel label="Navigation" />
+
+        <NavItem
+          icon={Database}
+          label="Data Analyst"
+          isActive={isChatTab}
           onClick={() => onNavigate('/')}
-          className={`flex items-center gap-3 w-full text-left p-2.5 text-sm font-medium rounded-lg transition-colors ${isChatTab ? 'bg-slate-800 text-emerald-400 border border-slate-700' : 'text-slate-400 hover:bg-slate-800/50 hover:text-slate-200 border border-transparent'
-            }`}
-        >
-          <Database size={16} /> Data Analyst
-        </button>
-        <button
+        />
+        <NavItem
+          icon={Newspaper}
+          label="News Desk"
+          isActive={isNewsTab}
           onClick={() => onNavigate('/news')}
-          className={`flex items-center gap-3 w-full text-left p-2.5 text-sm font-medium rounded-lg transition-colors ${isNewsTab ? 'bg-slate-800 text-emerald-400 border border-slate-700' : 'text-slate-400 hover:bg-slate-800/50 hover:text-slate-200 border border-transparent'
-            }`}
-        >
-          <Newspaper size={16} /> News Desk
-        </button>
-        <button
+        />
+        <NavItem
+          icon={Radio}
+          label="Live Center"
+          isActive={isLiveTab}
           onClick={() => onNavigate('/live')}
-          className={`flex items-center justify-between w-full text-left p-2.5 text-sm font-medium rounded-lg transition-colors ${isLiveTab ? 'bg-slate-800 text-emerald-400 border border-slate-700' : 'text-slate-400 hover:bg-slate-800/50 hover:text-slate-200 border border-transparent'
-            }`}
-        >
-          <div className="flex items-center gap-3">
-            <Activity size={16} className={isLiveTab ? 'text-red-500 animate-pulse' : 'text-slate-500'} />
-            Live Center
-          </div>
-        </button>
-        <button
+          badge={<LiveBadge />}
+        />
+        <NavItem
+          icon={User}
+          label="Player Intelligence"
+          isActive={isPlayerTab}
           onClick={() => onNavigate('/players')}
-          className={`flex items-center gap-3 w-full text-left p-2.5 text-sm font-medium rounded-lg transition-colors ${isPlayerTab ? 'bg-slate-800 text-emerald-400 border border-slate-700' : 'text-slate-400 hover:bg-slate-800/50 hover:text-slate-200 border border-transparent'
-            }`}
-        >
-          <User size={16} /> Player Intelligence
-        </button>
+        />
       </div>
 
       {isChatTab && (
-        <div className="flex flex-col flex-1 overflow-hidden space-y-6">
+        <div className="flex flex-col flex-1 overflow-hidden space-y-4">
 
           <button
             onClick={onNewChat}
-            className="w-full py-2.5 px-4 bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 rounded-lg hover:bg-emerald-500/20 hover:border-emerald-500/50 transition-all font-medium flex items-center justify-center gap-2 shadow-sm shrink-0"
+            className="
+              w-full py-2.5 px-4 flex items-center justify-center gap-2
+              bg-emerald-500/10 hover:bg-emerald-500/18
+              text-emerald-400 font-semibold text-sm
+              border border-emerald-500/25 hover:border-emerald-500/45
+              rounded-lg transition-all duration-150 shrink-0
+              shadow-sm shadow-emerald-900/10
+            "
           >
-            <PlusCircle size={18} />
+            <PlusCircle size={16} />
             New Analysis
           </button>
 
           {!activeChatId && (
-            <div className="flex flex-col space-y-2 shrink-0">
-              <div className="text-xs font-semibold text-slate-500 uppercase tracking-wider flex items-center gap-1.5 mb-1">
-                <Sparkles size={14} className="text-emerald-500" />
-                The Playbook
-              </div>
+            <div className="space-y-2 shrink-0 animate-in fade-in duration-300">
+              <SectionLabel icon={Sparkles} label="The Playbook" iconClass="text-emerald-600" />
               {suggestedPrompts.map((prompt, idx) => (
                 <button
                   key={idx}
                   onClick={() => onPromptSelect(prompt)}
-                  className="text-left p-2.5 text-sm text-slate-300 bg-slate-800/40 border border-slate-700/50 rounded-lg hover:bg-slate-800 hover:border-emerald-500/30 transition-all truncate"
+                  className="
+                    w-full text-left px-3 py-2.5 rounded-lg text-xs
+                    text-slate-400 hover:text-slate-200
+                    bg-slate-800/30 hover:bg-slate-800/70
+                    border border-slate-800 hover:border-emerald-500/25
+                    transition-all duration-150 leading-snug
+                  "
                 >
                   {prompt}
                 </button>
@@ -89,27 +142,32 @@ const Sidebar = ({ chats, activeChatId, onNewChat, onSelectChat, onPromptSelect,
             </div>
           )}
 
-          <div className="flex flex-col space-y-2 flex-1 overflow-hidden pt-2 border-slate-800">
-            <div className="text-xs font-semibold text-slate-500 uppercase tracking-wider flex items-center gap-1.5 mb-1 shrink-0">
-              <MessageSquare size={14} className="text-blue-400" />
-              Chat History
-            </div>
+          <div className="flex flex-col flex-1 overflow-hidden min-h-0">
+            <SectionLabel icon={MessageSquare} label="Chat History" iconClass="text-blue-600" />
 
             {chats.length === 0 ? (
-              <div className="text-sm text-slate-600 italic px-2">No past queries yet.</div>
+              <p className="text-xs text-slate-600 italic px-1 mt-1">No past queries yet.</p>
             ) : (
-              <div className="flex-1 overflow-y-auto space-y-1 pr-2 scrollbar-thin scrollbar-thumb-slate-700">
+              <div className="flex-1 overflow-y-auto space-y-0.5 pr-1 scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-transparent">
                 {chats.map((chat) => (
                   <div key={chat.id} className="group relative flex items-center">
                     <button
                       onClick={() => onSelectChat(chat.id)}
-                      className={`flex-1 text-left p-2.5 pr-8 text-sm flex items-center gap-2 truncate rounded-lg transition-colors ${activeChatId === chat.id
-                        ? 'bg-slate-800 text-emerald-400 border border-slate-700'
-                        : 'text-slate-400 hover:bg-slate-800/50 hover:text-slate-200 border border-transparent'
-                        }`}
                       title={chat.title}
+                      className={`
+                        relative flex-1 text-left px-3 py-2 pr-8 rounded-lg
+                        text-xs font-medium truncate transition-all duration-150
+                        border
+                        ${activeChatId === chat.id
+                          ? 'bg-emerald-500/8 text-emerald-400 border-emerald-500/20'
+                          : 'text-slate-500 hover:text-slate-300 hover:bg-slate-800/50 border-transparent'
+                        }
+                      `}
                     >
-                      <span className="truncate">{chat.title}</span>
+                      {activeChatId === chat.id && (
+                        <span className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-4 bg-emerald-500 rounded-r-full" />
+                      )}
+                      <span className="truncate block">{chat.title}</span>
                     </button>
 
                     <button
@@ -117,13 +175,18 @@ const Sidebar = ({ chats, activeChatId, onNewChat, onSelectChat, onPromptSelect,
                         e.stopPropagation();
                         if (onDeleteChat) onDeleteChat(chat.id);
                       }}
-                      className={`absolute right-2 p-1.5 rounded-md transition-all duration-200 
-                      opacity-0 group-hover:opacity-100 focus:opacity-100
-                      ${activeChatId === chat.id ? 'text-emerald-500/70 hover:text-red-400 hover:bg-slate-700' : 'text-slate-500 hover:text-red-400 hover:bg-slate-800'}
-                    `}
-                      title="Delete Analysis"
+                      title="Delete analysis"
+                      className={`
+                        absolute right-1.5 p-1 rounded-md
+                        opacity-0 group-hover:opacity-100 focus:opacity-100
+                        transition-all duration-150
+                        ${activeChatId === chat.id
+                          ? 'text-emerald-600/60 hover:text-red-400 hover:bg-slate-800'
+                          : 'text-slate-600 hover:text-red-400 hover:bg-slate-800'
+                        }
+                      `}
                     >
-                      <Trash2 size={14} />
+                      <Trash2 size={13} />
                     </button>
                   </div>
                 ))}
@@ -133,17 +196,23 @@ const Sidebar = ({ chats, activeChatId, onNewChat, onSelectChat, onPromptSelect,
         </div>
       )}
 
-      <button
-        onClick={handleLogout}
-        className="mt-auto w-full flex items-center gap-3 px-4 py-3 text-sm text-slate-400 hover:text-red-400 hover:bg-red-500/10 rounded-xl transition-colors"
-      >
-        <LogOut size={18} />
-        Sign Out
-      </button>
+      <div className="mt-auto pt-4 border-t border-slate-800/80 shrink-0">
+        <button
+          onClick={handleLogout}
+          className="
+            w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg
+            text-sm text-slate-500 hover:text-red-400
+            hover:bg-red-500/6 border border-transparent hover:border-red-500/15
+            transition-all duration-150
+          "
+        >
+          <LogOut size={15} className="shrink-0" />
+          Sign out
+        </button>
+      </div>
 
     </div>
   );
 };
 
 export default Sidebar;
-

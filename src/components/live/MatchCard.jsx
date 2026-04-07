@@ -10,20 +10,48 @@ const MatchCard = ({ match }) => {
 
   const isLive = match.matchStarted && !match.matchEnded;
 
-  const getScoreDisplay = (teamName) => {
-    if (!match.score || match.score.length === 0) {
+  let team1Scores = [];
+  let team2Scores = [];
+
+  if (match.score && match.score.length > 0) {
+    const t1Str = team1.toLowerCase();
+    const t2Str = team2.toLowerCase();
+    const t1Short = match.teamInfo?.[0]?.shortname?.toLowerCase();
+    const t2Short = match.teamInfo?.[1]?.shortname?.toLowerCase();
+
+    const ambiguousScores = [];
+
+    match.score.forEach(s => {
+      const inn = s.inning.toLowerCase();
+      // Check if full name or shortname matches
+      const match1 = inn.includes(t1Str) || (t1Short && inn.startsWith(t1Short));
+      const match2 = inn.includes(t2Str) || (t2Short && inn.startsWith(t2Short));
+
+      if (match1 && !match2) {
+        team1Scores.push(s);
+      } else if (match2 && !match1) {
+        team2Scores.push(s);
+      } else {
+        // If it matches BOTH (the API bug) or NEITHER, save it for Pass 2
+        ambiguousScores.push(s);
+      }
+    });
+
+    ambiguousScores.forEach(s => {
+      // If a string contains both team names, give it to the team with fewer scores assigned
+      if (team1Scores.length < team2Scores.length) {
+        team1Scores.push(s);
+      } else {
+        team2Scores.push(s);
+      }
+    });
+  }
+
+  const renderScores = (scores) => {
+    if (!scores || scores.length === 0) {
       return <span className="text-xs text-slate-600 font-medium whitespace-nowrap">Yet to bat</span>;
     }
-
-    const teamScores = match.score.filter(s =>
-      s.inning.toLowerCase().includes(teamName.toLowerCase())
-    );
-
-    if (teamScores.length === 0) {
-      return <span className="text-xs text-slate-600 font-medium whitespace-nowrap">Yet to bat</span>;
-    }
-
-    return teamScores.map((s, index) => (
+    return scores.map((s, index) => (
       <div key={index} className="text-right leading-tight whitespace-nowrap mb-0.5 last:mb-0">
         <span className="font-bold text-slate-200 text-sm">{s.r}/{s.w}</span>
         <span className="text-xs text-slate-500 ml-1.5">({s.o} ov)</span>
@@ -68,7 +96,7 @@ const MatchCard = ({ match }) => {
             <span className="font-semibold text-slate-200 truncate block" title={team1}>{team1}</span>
           </div>
           <div className="flex flex-col items-end justify-center shrink-0">
-            {getScoreDisplay(team1)}
+            {renderScores(team1Scores)}
           </div>
         </div>
 
@@ -84,7 +112,7 @@ const MatchCard = ({ match }) => {
             <span className="font-semibold text-slate-200 truncate block" title={team2}>{team2}</span>
           </div>
           <div className="flex flex-col items-end justify-center shrink-0">
-            {getScoreDisplay(team2)}
+            {renderScores(team2Scores)}
           </div>
         </div>
 
